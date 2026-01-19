@@ -38,10 +38,16 @@
 -- +-------------------------------+------------+-------------+----------------------+
 
 
-SELECT teams.name, players.first_name, players.last_name, MAX(stats.home_runs)
-FROM stats
+SELECT teams.name, players.first_name, players.last_name, stats.home_runs
+FROM (
+    SELECT stats.team_id AS team_id, MAX(stats.home_runs) AS home_runs
+    FROM stats
+    INNER JOIN teams ON teams.id = stats.team_id
+    WHERE teams.year = 2019
+    GROUP BY stats.team_id
+) AS max_runs_stats
+INNER JOIN stats ON stats.team_id = max_runs_stats.team_id
+AND stats.home_runs = max_runs_stats.home_runs
 INNER JOIN players ON stats.player_id = players.id
 INNER JOIN teams ON stats.team_id = teams.id
-WHERE teams.year = 2019
-GROUP BY teams.name
 ORDER By teams.name
